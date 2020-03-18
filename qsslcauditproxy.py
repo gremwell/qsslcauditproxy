@@ -69,19 +69,19 @@ class OutputFactory:
         Update ncurse output.
         """
         self.screen.clear()
-        self.screen.addstr(self.header)
+        self.screen.addstr(HEADER)
         # enum dict and write output
         for host in self.ongoing_hosts:
             try:
                 if host.scanned:
-                    self.screen.addstr("\n[" + str(host.id) + "]Testing " +\
+                    self.screen.addstr("\n[" + str(host._id) + "]Testing " +\
                         host.hostname + " " + str(host.percentage) +\
                         "% done", curses.color_pair(2))
                 elif host.blacklisted:
-                    self.screen.addstr("\n[" + str(host.id) + "]Skipped " +\
+                    self.screen.addstr("\n[" + str(host._id) + "]Skipped " +\
                         host.hostname + " (BLACKLISTED)", curses.color_pair(3))
                 else:
-                    self.screen.addstr("\n[" + str(host.id) + "]Testing " +\
+                    self.screen.addstr("\n[" + str(host._id) + "]Testing " +\
                         host.hostname + " " + str(host.percentage) +\
                         "% done", curses.color_pair(1))
             except curses.error:
