@@ -1,11 +1,11 @@
-# qsslcaudit-proxy
+# qsslcauditproxy
 
 Qsslcauditproxy is a proxy wrapper for the qsslcaudit tool, which is available at [https://github.com/gremwell/qsslcaudit](https://github.com/gremwell/qsslcaudit).
 
 The script will then act as a non-intercepting proxy for all SSL traffic. For each new host, it will redirect the SSL stream to an instance of qsslcaudit, so that the client connection can be tested. HTTP connections will just be forwarded, so nothing is blocked.
 
 When a host is tested, the original flow is restored so that the application functionality can go back to normal.
-The script can also be configured with a blacklist file. Hosts in this file will not be tested.
+The script can also be configured with a blacklist file. If a part of the hostname matches a blacklist entry, this host will not be tested. 
 
 ## Installation
 
