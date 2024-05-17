@@ -29,20 +29,24 @@ class Host:
     Represents a host to be tested.
     '''
     id_iter = itertools.count()
-    def __init__(self, hostname, blacklist):
+    def __init__(self, hostname, blacklist, whitelist):
         '''
         Consructor.
 
         @Args:
             hostname(str): server hostname
             blacklist(list): list of blacklisted domains
+            whitelist(list): list of whitelisted domains
 
         @Returns:
             None
         '''
         self.percentage = 0
         self.scanned = False
-        self.blacklisted = bool(sum([bhost in hostname for bhost in blacklist]))
+        if(blacklist):
+            self.blacklisted = bool(sum([bhost in hostname for bhost in blacklist]))
+        if(whitelist):
+            self.blacklisted = not bool(hostname in whitelist) 
         self.hostname = hostname
         self._id = next(self.id_iter)
         self.qsslcauditport = 8443 + self._id
@@ -116,6 +120,12 @@ def get_args():
         help='Port for proxy to listen on',
         required=False,
         default=8888
+    )
+    parser.add_argument(
+        '--whitelist',
+        help='Only scan hosts in whitelist file, ignore all others. '\
+                'You cannot use --whitelist and --blacklist at the same time',
+        required=False
     )
     args, commandline_options = parser.parse_known_args()
     return args, commandline_options
@@ -245,7 +255,7 @@ def proxy_client_server(clientsock, server_address, initial_data):
     return
 
 
-def handler(clientsock, blacklist, output_factory, ongoing_hosts, commandline_options):
+def handler(clientsock, blacklist, whitelist, output_factory, ongoing_hosts, commandline_options):
     """
     Main handler.
 
@@ -279,7 +289,7 @@ def handler(clientsock, blacklist, output_factory, ongoing_hosts, commandline_op
             host = ongoing_host
     #if the host is not yet created, create now object and start qsslcaudit thread for the host
     if host is None:
-        host = Host(dsthost, blacklist)
+        host = Host(dsthost, blacklist, whitelist)
         ongoing_hosts.append(host)
         if not host.blacklisted:
             _thread.start_new_thread(run_qsslcaudit, (host, commandline_options))
@@ -316,6 +326,15 @@ def main(screen, args, commandline_options):
     if args.blacklist:
         with open(args.blacklist, 'r') as f:
             blacklist = [line.strip() for line in f.readlines()]
+    
+    whitelist = []
+    if args.whitelist:
+        with open(args.whitelist, 'r') as f:
+            whitelist = [line.strip() for line in f.readlines()]
+    
+    if args.blacklist and args.whitelist:
+        print("You cannot use --whitelist and --blacklist at the same time")
+        return
 
     print("[+]Proxy listening for incoming connections on", args.p)
     ongoing_hosts = list()
@@ -327,6 +346,7 @@ def main(screen, args, commandline_options):
             (
                 clientsock,
                 blacklist,
+                whitelist,
                 outputfactory,
                 ongoing_hosts,
                 commandline_options

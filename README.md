@@ -43,6 +43,9 @@ optional arguments:
                         Blacklist file that holds hosts to exclude from
                         testing, for example known endpoints used by the OS
                         (default: None)
+  --whitelist WHITELIST
+                        Whitelist file. Only test the hosts listed in the file.
+                        --whitelist and --blacklist can't be used together.
   -p P                  Port for proxy to listen on (default: 8888)
 ```
 
